@@ -22,7 +22,7 @@ double a_0(points_t * pts, double a0)
 
 
 /* Wspolczynniki ai oraz bi */
-void a_and_b(points_t * pts, spline_t * spl, double * a, double * b, int stopien)
+void a_and_b(points_t * pts, double * a, double * b, int stopien)
 {
  int i, j;
  
@@ -48,7 +48,7 @@ void a_and_b(points_t * pts, spline_t * spl, double * a, double * b, int stopien
 void make_spl(points_t * pts, spline_t * spl)
 {
  double a0;
- int stopien, i;
+ int stopien, i, j;
  double *a = NULL;
  double *b = NULL;
 
@@ -67,12 +67,19 @@ void make_spl(points_t * pts, spline_t * spl)
 
  alloc_spl(spl, pts->n); /* Ilosc splinesow */
  
+ a_and_b(pts, a, b, stopien);
+ 
  for (i = 0; i < spl->n; i++)
- 	spl->f[i] = a0;
- 
- a_and_b(pts, spl, a, b, stopien);
- 
- 
+	{
+	 spl->x[i] = pts->x[i];
+	 
+ 	 for (j = 0; j < stopien; j++)
+		{
+		 spl->f[i] = spl->f[i] + (a[j] * cos(2.0 * M_PI * j * spl->x[i] / spl->n)) + (b[j] * sin(2.0 * M_PI * j * spl->x[i] / spl->n));
+		}
+
+	 spl->f[i] += a0;	 
+	}
 
  free(a);
  free(b); 
