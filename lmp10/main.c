@@ -157,7 +157,14 @@ main (int argc, char **argv)
                value_spl (&spl, fromX + i * dx));
 
     fclose (gpf);
-  }
+  
+ free(pts.x);
+ free(pts.y);
+ free(spl.f);
+ free(spl.x);
+ free(spl.a);
+ free(spl.b);
+ }
 
   return 0;
 }
