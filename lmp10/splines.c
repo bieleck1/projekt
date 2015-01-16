@@ -1,6 +1,7 @@
 #include "splines.h"
 
 #include <stdlib.h>
+#include <math.h>
 
 #define MALLOC_FAILED( P, SIZE ) (((P)=malloc( (SIZE)*sizeof( *(P))))==NULL)
 
@@ -10,9 +11,8 @@ alloc_spl (spline_t * spl, int n)
   spl->n = n;
   return MALLOC_FAILED (spl->x, spl->n)
     || MALLOC_FAILED (spl->f, spl->n)
-    || MALLOC_FAILED (spl->f1, spl->n)
-    || MALLOC_FAILED (spl->f2, spl->n)
-    || MALLOC_FAILED (spl->f3, spl->n);
+    || MALLOC_FAILED (spl->a, spl->n)
+    || MALLOC_FAILED (spl->b, spl->n);
 }
 
 int
@@ -27,8 +27,8 @@ read_spl (FILE * inf, spline_t * spl)
 
   for (i = 0; i < spl->n; i++)
     if (fscanf
-        (inf, "%lf %lf %lf %lf %lf", spl->x + i, spl->f + i, spl->f1 + i,
-         spl->f2 + i, spl->f3 + i) != 5)
+        (inf, "%lf %lf %lf %lf", spl->x + i, spl->f + i, spl->a + i,
+         spl->b + i) != 4)
       return 1;
 
   return 0;
@@ -39,25 +39,25 @@ write_spl (spline_t * spl, FILE * ouf)
 {
   int i;
   fprintf (ouf, "%d\n", spl->n);
-  for (i = 0; i < spl->n; i++)
-    fprintf (ouf, "%g %g %g %g %g\n", spl->x[i], spl->f[i], spl->f1[i],
-             spl->f2[i], spl->f3[i]);
+  for (i = 0; i < ((spl->n - 1) / 2); i++)
+    fprintf (ouf, "%g %g %g %g\n", spl->x[i], spl->f[i], spl->a[i],
+             spl->b[i]);
 }
 
 double
 value_spl (spline_t * spl, double x)
 {
-  int i;
-  double dx;
+  int i, stopien;
+  double f = 0.0;
 
-  for (i = spl->n - 1; i > 0; i--)
-    if (spl->x[i] < x)
-      break;
+  if (spl->n % 2 == 1)
+  	stopien = ((spl->n - 1) / 2) - 1;
+  else
+ 	stopien = spl->n / 2 - 1;
+  
+  for (i = 1; i <= stopien; i++)
+	f = f + (spl->a[i] * cos(4.0 * i * x / spl->n)) + (spl->b[i] * sin(4.0 * i * x / spl->n));
+  f += spl->a[0];
 
-  dx = x - spl->x[i];
-
-  return spl->f[i]
-	+ dx * spl->f1[i]
-	+ dx * dx / 2 *  spl->f2[i] 
-	+ dx * dx * dx / 6 * spl->f3[i];
+  return f;
 }
