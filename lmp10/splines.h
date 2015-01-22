@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#include "points.h"
+
 typedef struct {
 		int n;
 		double *x;
@@ -15,8 +17,8 @@ int alloc_spl( spline_t *spl, int n );
 
 int  read_spl ( FILE *inf,  spline_t *spl );
 
-void  write_spl ( spline_t *spl, FILE * ouf );
+void  write_spl ( spline_t *spl, points_t * pts, FILE * ouf );
 
-double value_spl( spline_t *spl, double x);
+double value_spl( spline_t *spl, points_t * pts, double x);
 
 #endif

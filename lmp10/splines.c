@@ -35,28 +35,26 @@ read_spl (FILE * inf, spline_t * spl)
 }
 
 void
-write_spl (spline_t * spl, FILE * ouf)
+write_spl (spline_t * spl, points_t *pts,  FILE * ouf)
 {
   int i;
-  fprintf (ouf, "%d\n", spl->n);
-  for (i = 0; i < ((spl->n - 1) / 2); i++)
+  fprintf (ouf, "%d\n", pts->l);
+  for (i = 0; i < pts->l; i++)
     fprintf (ouf, "%g %g %g %g\n", spl->x[i], spl->f[i], spl->a[i],
              spl->b[i]);
 }
 
 double
-value_spl (spline_t * spl, double x)
+value_spl (spline_t * spl, points_t * pts, double x)
 {
   int i, stopien;
   double f = 0.0;
 
-  if (spl->n % 2 == 1)
-  	stopien = ((spl->n - 1) / 2) - 1;
-  else
- 	stopien = spl->n / 2 - 1;
+  stopien = pts->l;
+ printf("%d", stopien);
   
   for (i = 1; i <= stopien; i++)
-	f = f + (spl->a[i] * cos(4.0 * i * x / spl->n)) + (spl->b[i] * sin(4.0 * i * x / spl->n));
+	f = f + (spl->a[i] * cos(2.0 * M_PI * i * x / spl->n)) + (spl->b[i] * sin(2.0 * M_PI * i * x / spl->n));
   f += spl->a[0];
 
   return f;

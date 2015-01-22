@@ -11,11 +11,15 @@ void make_spl (points_t * pts, spline_t * spl)
  int i, j, stopien;
  int n = pts->n;
 
- if (n % 2 == 1)
-	stopien = (n - 1)/2-1;
- else 
-	stopien = n/2-1;
+ stopien = pts->l;
+
  
+ if (stopien > ((pts->n - 1) / 2))
+	{
+	 stopien = ((pts->n - 1) / 2);
+	 pts->l = stopien;
+	}
+
  if (alloc_spl(spl, n) == 0)
 	{
 	 spl->x = pts->x;
