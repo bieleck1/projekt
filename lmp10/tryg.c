@@ -8,16 +8,13 @@
 
 void make_spl (points_t * pts, spline_t * spl)
 {
- int i, j, stopien;
+ int i, j;
  int n = pts->n;
 
- stopien = pts->l;
-
  
- if (stopien > ((pts->n - 1) / 2))
+ if (pts->l > ((pts->n - 1) / 2))
 	{
-	 stopien = ((pts->n - 1) / 2);
-	 pts->l = stopien;
+	 pts->l = ((pts->n - 1) / 2);
 	}
 
  if (alloc_spl(spl, n) == 0)
@@ -26,11 +23,11 @@ void make_spl (points_t * pts, spline_t * spl)
 	 spl->f = pts->y;
 
 	 spl->a[0] = 0.0;
-	 for (i = 0; i <= stopien; i++)
+	 for (i = 0; i <= pts->l; i++)
 		spl->a[0] += spl->f[i];
 	 spl->a[0] /= n;
 
-	 for (i = 1; i <= stopien; i++)
+	 for (i = 1; i <= pts->l; i++)
 		{
 		 spl->a[i] = 0.0;
 		 spl->b[i] = 0.0;

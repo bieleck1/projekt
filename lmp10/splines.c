@@ -47,13 +47,10 @@ write_spl (spline_t * spl, points_t *pts,  FILE * ouf)
 double
 value_spl (spline_t * spl, points_t * pts, double x)
 {
-  int i, stopien;
+  int i;
   double f = 0.0;
-
-  stopien = pts->l;
- printf("%d", stopien);
   
-  for (i = 1; i <= stopien; i++)
+  for (i = 1; i <= pts->l; i++)
 	f = f + (spl->a[i] * cos(2.0 * M_PI * i * x / spl->n)) + (spl->b[i] * sin(2.0 * M_PI * i * x / spl->n));
   f += spl->a[0];
 

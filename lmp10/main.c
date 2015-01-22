@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 char *usage =
-  "Usage: %s -s spline-file [-p points-file] [ -g gnuplot-file [-f from_x -t to_x -n n_points ] ] -l Liczba_funkcji_bazowych\n"
+  "Usage: %s -s spline-file [-p points-file] [ -g gnuplot-file [-f from_x -t to_x -n n_points -l Liczba_funkcji_bazowych] ]\n"
   "            if points-file is given then\n"
   "               reads discrete 2D points from points-file\n"
   "               writes spline approximation to spline-file\n"
@@ -21,6 +21,7 @@ char *usage =
   "               - to_x defaults to x-coordinate of the last point\n"
   "               - n_points defaults to 100\n"
   "               - n_points must be > 1\n"
+  "		  - Liczba_funkcji_bazowych must be > 0\n"
   "            endif\n";
 
 int
@@ -41,6 +42,7 @@ main (int argc, char **argv)
 
   pts.n = 0;
   spl.n = 0;
+  pts.l = 0;
 
   /* process options, save user choices */
   while ((opt = getopt (argc, argv, "p:s:g:f:t:n:l:")) != -1) {
@@ -71,9 +73,15 @@ main (int argc, char **argv)
       exit (EXIT_FAILURE);
     }
   }
-
-  pts.l = l;
-
+ 
+ if(l <= 0)
+	{
+	 fprintf(stderr, "Podaj liczbe funkcji bazowych > 0\n");
+	 exit(EXIT_FAILURE);
+	}
+ else
+	pts.l = l;
+printf("%d\n", pts.l);
 	if( optind < argc ) {
 		fprintf( stderr, "\nBad parameters!\n" );
 		for( ; optind < argc; optind++ )
@@ -94,6 +102,7 @@ main (int argc, char **argv)
     }
 
     if (read_pts_failed (inf, &pts)) {
+	fclose(inf);
       fprintf (stderr, "%s: bad contents of points file: %s\n\n", argv[0],
                inp);
       exit (EXIT_FAILURE);
@@ -101,8 +110,18 @@ main (int argc, char **argv)
     else
       fclose (inf);
 
+    if(out == NULL)
+	{
+	 free(pts.x);
+	 free(pts.y);
+	 fprintf (stderr, "%s: Nie moge zapisac spline'ow: (null)\n\n", argv[0]);
+	 exit (EXIT_FAILURE);
+	}
+
     ouf = fopen (out, "w");
     if (ouf == NULL) {
+	free(pts.x);
+	free(pts.y);
       fprintf (stderr, "%s: can not write spline file: %s\n\n", argv[0], out);
       exit (EXIT_FAILURE);
     }
@@ -113,6 +132,8 @@ main (int argc, char **argv)
 			write_spl (&spl, &pts, ouf);
 
     fclose (ouf);
+
+
   } else if (out != NULL) {  /* if point-file was NOT given, try to read splines from a file */
     FILE *splf = fopen (out, "r");
     if (splf == NULL) {
@@ -120,16 +141,22 @@ main (int argc, char **argv)
       exit (EXIT_FAILURE);
     }
     if (read_spl (splf, &spl)) {
+	fclose(splf);
       fprintf (stderr, "%s: bad contents of spline file: %s\n\n", argv[0],
                inp);
       exit (EXIT_FAILURE);
     }
+	
+  fclose(splf);
+
   } else { /* ponts were not given nor spline was given -> it is an error */
     fprintf (stderr, usage, argv[0]);
     exit (EXIT_FAILURE);
   }
 
   if (spl.n < 1) { /* check if there is a valid spline */
+	free(pts.x);
+	free(pts.y);
     fprintf (stderr, "%s: bad spline: n=%d\n\n", argv[0], spl.n);
     exit (EXIT_FAILURE);
   }
@@ -153,7 +180,14 @@ main (int argc, char **argv)
 		}
     dx = (toX - fromX) / (n - 1);
 
-    if (gpf == NULL) {
+    if (gpf == NULL) 
+    {
+	free(pts.x);
+	free(pts.y);
+	free(spl.x);
+	free(spl.f);
+	free(spl.a);
+	free(spl.b);
       fprintf (stderr, "%s: can not write gnuplot file: %s\n\n", argv[0],
                gpt);
       exit (EXIT_FAILURE);
